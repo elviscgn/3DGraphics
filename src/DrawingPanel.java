@@ -1,7 +1,11 @@
 import javax.swing.*;
 import java.awt.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class DrawingPanel extends JPanel {
+
+    private List<CustomPoint> points = new ArrayList<>();
 
     // attributes
     Color backgroundColor = new Color(10,10,10);
@@ -16,12 +20,13 @@ public class DrawingPanel extends JPanel {
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
 
-        if (!isClear) {
-            Graphics2D g2d = (Graphics2D) g;
-            g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
-                    RenderingHints.VALUE_ANTIALIAS_ON);
+        Graphics2D g2d = (Graphics2D) g;
+        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+                RenderingHints.VALUE_ANTIALIAS_ON);
 
-            drawShapes(g2d);
+        for (CustomPoint p : points) {
+            g2d.setColor(p.color);
+            g2d.fillRect(p.x, p.y, p.size, p.size);
         }
 
     }
@@ -32,18 +37,23 @@ public class DrawingPanel extends JPanel {
     }
 
     public void clearScreen() {
-        this.isClear = true;
+//        this.isClear = true;
+        points.clear();
         repaint();
     }
 
-    public void point(int x, int y) {
-        if (!this.isClear) {
-            Graphics2D g2d = (Graphics2D) g;
-            g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
-                    RenderingHints.VALUE_ANTIALIAS_ON);
+    public void drawPoint(int x, int y) {
+        int size = 10;
+        CustomPoint newPoint = new CustomPoint(x, y, size);
+        newPoint.toScreenCoord();
 
-            g2d.fillRect(x, y, 100, 100);
+        System.out.println("Lol i got" + newPoint.x + newPoint.y);
 
-        }
+        points.add(newPoint);
+        repaint();
     }
+
+
+
+
 }
