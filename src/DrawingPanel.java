@@ -1,5 +1,6 @@
 import javax.swing.*;
 import java.awt.*;
+import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,6 +12,10 @@ public class DrawingPanel extends JPanel {
     Color backgroundColor = new Color(10,10,10);
     Color foregroundColor = new Color(80, 255, 80);
     public boolean isClear = false;
+
+    // game stuff
+    int FPS = 60;
+    double dz = 0;
 
     public DrawingPanel() {
         this.setBackground(backgroundColor);
@@ -26,7 +31,9 @@ public class DrawingPanel extends JPanel {
 
         for (CustomPoint p : points) {
             g2d.setColor(p.color);
-            g2d.fillRect(p.x, p.y, p.size, p.size);
+            Rectangle2D.Double rect = new Rectangle2D.Double(p.x, p.y, p.size, p.size);
+
+            g2d.fill(rect);
         }
 
     }
@@ -42,10 +49,11 @@ public class DrawingPanel extends JPanel {
         repaint();
     }
 
-    public void drawPoint(int x, int y) {
+    public void drawPoint(double x, double y) {
         int size = 10;
+
         CustomPoint newPoint = new CustomPoint(x, y, size);
-        newPoint.toScreenCoord();
+        newPoint.toScreenCord();
 
         System.out.println("Lol i got" + newPoint.x + newPoint.y);
 
@@ -53,7 +61,39 @@ public class DrawingPanel extends JPanel {
         repaint();
     }
 
+    // Inside DrawingPanel.java
+
+    public CustomPoint project(double x, double y, double z) {
+        // 1. Perspective Divide
+        double px = x / z;
+        double py = y / z;
+
+        double scale = 400.0;
+        px *= scale;
+        py *= scale;
+
+        // 3. Center it (Shift 0,0 from top-left to middle of window)
+        px += (getWidth() / 2.0);
+        py += (getHeight() / 2.0);
+
+        return new CustomPoint(px, py, 10);
+    }
+
+    public void updateFrame(double[][] vertices) {
+        double dt = 1.0 / FPS;
+        this.dz += 2.0 * dt;
 
 
+        if (dz > 20) dz = 0.000001;
 
+        this.points.clear();
+
+
+        for (int row = 0; row < vertices.length; row++) {
+            points.add(this.project(vertices[row][0], vertices[row][1], vertices[row][2]+dz));
+
+        }
+
+        repaint();
+    }
 }
